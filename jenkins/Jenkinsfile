@@ -3,26 +3,22 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
+                sh 'mvn -version 3.8.7clean install'
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn -B test'
+                sh 'mvn -version 3.8.7 test'
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml'
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }
         stage('Deliver') {
             steps {
-                sh '''
-                NAME=$(mvn -B -q -DforceStdout help:evaluate -Dexpression=project.name)
-                VERSION=$(mvn -B -q -DforceStdout help:evaluate -Dexpression=project.version)
-                java -jar target/${NAME}-${VERSION}.jar
-                '''
+                sh './jenkins/scripts/deliver.sh'
             }
         }
     }
