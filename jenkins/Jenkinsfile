@@ -3,23 +3,35 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'mvn -version 3.8.7 clean install'
+                echo 'Building the project...'
+                sh 'mvn clean install'
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn -version 3.8.7 test'
+                echo 'Running tests...'
+                sh 'mvn test'
             }
             post {
                 always {
+                    echo 'Publishing test results...'
                     junit 'target/surefire-reports/*.xml'
                 }
             }
         }
         stage('Deliver') {
             steps {
-                sh './jenkins/scripts/deliver.sh'
+                echo 'Delivering the application...'
+                sh '''
+                    chmod +x ./jenkins/scripts/deliver.sh
+                    ./jenkins/scripts/deliver.sh
+                '''
             }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline execution completed.'
         }
     }
 }
