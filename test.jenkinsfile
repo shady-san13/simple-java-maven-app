@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building the project...'
+                sh 'mvn clean install'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    echo 'Publishing test results...'
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Deliver') {
+            steps {
+                echo 'Delivering the application...'
+                sh '''
+                    chmod +x ./jenkins/scripts/deliver.sh
+                    ./jenkins/scripts/deliver.sh
+                '''
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline execution completed sany'
+        }
+    }
+}
